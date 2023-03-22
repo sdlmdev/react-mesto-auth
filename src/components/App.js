@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { configApi } from "../utils/Api";
 import CurrentUserContext from "../contexts/CurrentUserContext";
 import Header from "./Header";
@@ -10,10 +10,11 @@ import EditProfilePopup from "./EditProfilePopup";
 import PopupWithConfirmation from "./PopupWithConfirmation";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
-// import Login from "./Login";
-// import Register from "./Register";
+import Login from "./Login";
+import Register from "./Register";
 import ProtectedRoute from "./ProtectedRoute";
-// import InfoTooltip from "./InfoTooltip";
+import InfoTooltip from "./InfoTooltip";
+import { register, login, checkToken } from "../utils/Auth";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
@@ -25,7 +26,11 @@ function App() {
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isConfirmPlacePopupOpen, setIsConfirmPlacePopupOpen] = useState(false);
   const [isProcessStatus, setIsProcessStatus] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const [isAuthStatus, setIsAuthStatus] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     Promise.all([configApi.getUserData(), configApi.getInitialCards()])
@@ -51,6 +56,26 @@ function App() {
       document.removeEventListener("mousedown", handleClosePopup);
     };
   }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem("jwt")) {
+      const jwt = localStorage.getItem("jwt");
+      checkToken(jwt)
+        .then((res) => {
+          setUserEmail(res.data.email);
+          setIsLoggedIn(true);
+          navigate("/");
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [navigate]);
+
+  function signOut() {
+    localStorage.removeItem('jwt');
+    setUserEmail("");
+    setIsLoggedIn(false);
+    navigate('/sign-in');
+  }
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -80,6 +105,7 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsImagePopupOpen(false);
     setIsConfirmPlacePopupOpen(false);
+    setIsInfoTooltipOpen(false);
   }
 
   function handleCardLike(card) {
@@ -132,7 +158,6 @@ function App() {
   }
 
   function handleAddPlaceSubmit(cardData) {
-    setIsProcessStatus(true);
     configApi
       .addNewCard(cardData)
       .then((newCard) => {
@@ -143,11 +168,44 @@ function App() {
       .finally(() => setIsProcessStatus(false));
   }
 
+  function handleRegister(password, email) {
+    setIsProcessStatus(true);
+    register(password, email)
+      .then(() => {
+        setIsAuthStatus(true);
+        setIsInfoTooltipOpen(true);
+        navigate("/sign-in");
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsAuthStatus(false);
+        setIsInfoTooltipOpen(true);
+      })
+      .finally(() => setIsProcessStatus(false));
+  }
+
+  function handleLogin(password, email) {
+    setIsProcessStatus(true);
+    login(password, email)
+      .then((res) => {
+        setIsLoggedIn(true);
+        setUserEmail(email);
+        navigate("/");
+        localStorage.setItem("jwt", res.token);
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsAuthStatus(false);
+        setIsInfoTooltipOpen(true);
+      })
+      .finally(() => setIsProcessStatus(false));
+  }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <div className="page__content">
-          <Header />
+          <Header email={userEmail} signOut={signOut} />
           <Routes>
             <Route
               path="/"
@@ -165,8 +223,26 @@ function App() {
                 />
               }
             />
-            {/* <Route path="/sign-up" element={<Register />} />
-            <Route path="/sign-in" element={<Login />} /> */}
+            <Route
+              path="/sign-up"
+              element={
+                <Register
+                  register={handleRegister}
+                  isLoggedIn={isLoggedIn}
+                  isLoading={isProcessStatus}
+                />
+              }
+            />
+            <Route
+              path="/sign-in"
+              element={
+                <Login
+                  login={handleLogin}
+                  isLoggedIn={isLoggedIn}
+                  isLoading={isProcessStatus}
+                />
+              }
+            />
           </Routes>
           <Footer />
           <EditAvatarPopup
@@ -198,6 +274,11 @@ function App() {
             card={selectedCard}
             onClose={closeAllPopups}
             isOpen={isImagePopupOpen}
+          />
+          <InfoTooltip
+            onClose={closeAllPopups}
+            isOpen={isInfoTooltipOpen}
+            isAuthStatus={isAuthStatus}
           />
         </div>
       </div>
