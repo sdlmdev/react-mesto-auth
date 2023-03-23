@@ -18,13 +18,13 @@ function PageWithForm({
         <fieldset className="page-form__set">
           <input
             id="email"
-            type="email"
+            type="text"
             placeholder="Email"
             className={`page-form__input ${
               !errors.email ? "" : "popup__input_type_error"
             }`}
             name="email"
-            minLength="2"
+            minLength="5"
             maxLength="40"
             required
             value={values.email || ""}
@@ -42,7 +42,6 @@ function PageWithForm({
               !errors.password ? "" : "popup__input_type_error"
             }`}
             name="password"
-            minLength="2"
             required
             value={values.password || ""}
             onChange={handleInputChange}
@@ -53,7 +52,7 @@ function PageWithForm({
           </span>
           <button
             className={`page-form__button ${
-              buttonStatus ? "" : "popup__button_disabled"
+              buttonStatus ? "" : "page-form__button_disabled"
             }`}
             type="submit"
             disabled={!buttonStatus}

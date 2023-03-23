@@ -17,20 +17,20 @@ import InfoTooltip from "./InfoTooltip";
 import { register, login, checkToken } from "../utils/Auth";
 
 function App() {
+  const navigate = useNavigate();
+  const [cards, setCards] = useState([]);
+  const [userEmail, setUserEmail] = useState("");
   const [currentUser, setCurrentUser] = useState({});
   const [selectedCard, setSelectedCard] = useState({});
-  const [cards, setCards] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAuthStatus, setIsAuthStatus] = useState(false);
+  const [isProcessStatus, setIsProcessStatus] = useState(false);
+  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
-  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
-  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isConfirmPlacePopupOpen, setIsConfirmPlacePopupOpen] = useState(false);
-  const [isProcessStatus, setIsProcessStatus] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
-  const [isAuthStatus, setIsAuthStatus] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     Promise.all([configApi.getUserData(), configApi.getInitialCards()])
@@ -70,11 +70,10 @@ function App() {
     }
   }, [navigate]);
 
-  function signOut() {
-    localStorage.removeItem('jwt');
+  function handleSignOut() {
+    localStorage.removeItem("jwt");
     setUserEmail("");
     setIsLoggedIn(false);
-    navigate('/sign-in');
   }
 
   function handleEditAvatarClick() {
@@ -205,7 +204,7 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <div className="page__content">
-          <Header email={userEmail} signOut={signOut} />
+          <Header email={userEmail} logout={handleSignOut} />
           <Routes>
             <Route
               path="/"

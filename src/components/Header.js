@@ -2,7 +2,7 @@ import logo from "../images/logo.svg";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
-function Header({ email, signOut }) {
+function Header({ email, logout }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const location = useLocation();
 
@@ -15,7 +15,7 @@ function Header({ email, signOut }) {
       {isPopupOpen && location.pathname === "/" && (
         <div className="header__popup">
           <p className="header__popup__email">{email}</p>
-          <Link to="/sign-in" className="header__popup__link">
+          <Link to="/sign-in" className="header__popup__link" onClick={logout}>
             Выйти
           </Link>
         </div>
@@ -47,7 +47,7 @@ function Header({ email, signOut }) {
                 <Link
                   to="/sign-in"
                   className="header__link header__link_logout"
-                  onClick={signOut}
+                  onClick={logout}
                 >
                   Выйти
                 </Link>

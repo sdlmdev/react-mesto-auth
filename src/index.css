@@ -10,6 +10,7 @@
 @import url(./blocks/page-form/__set/page-form__set.css);
 @import url(./blocks/page-form/__button/page-form__button.css);
 @import url(./blocks/page-form/__input/page-form__input.css);
+@import url(./blocks/page-form/__button/_disabled/page-form__button_disabled.css);
 
 @import url(./blocks/header/header.css);
 @import url(./blocks/header/__logo/header__logo.css);
