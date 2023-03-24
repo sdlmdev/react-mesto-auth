@@ -22,7 +22,7 @@ function Header({ email, logout }) {
       )}
       <header className="header">
         <img src={logo} className="header__logo" alt="Логотип проекта Mesto" />
-        {location.pathname === "/" && <p className="header__email">{email}</p>}
+        {/* {location.pathname === "/" && <p className="header__email">{email}</p>} */}
         <Routes>
           <Route
             path="/sign-up"
@@ -44,6 +44,7 @@ function Header({ email, logout }) {
             path="/"
             element={
               <>
+                <p className="header__email">{email}</p>
                 <Link
                   to="/sign-in"
                   className="header__link header__link_logout"

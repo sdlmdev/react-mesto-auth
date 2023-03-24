@@ -20,6 +20,9 @@ function App() {
   const navigate = useNavigate();
   const [cards, setCards] = useState([]);
   const [userEmail, setUserEmail] = useState("");
+  const [popupMessageStatus, setPopupMessageStatus] = useState({
+    message: "",
+  });
   const [currentUser, setCurrentUser] = useState({});
   const [selectedCard, setSelectedCard] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,13 +36,15 @@ function App() {
   const [isConfirmPlacePopupOpen, setIsConfirmPlacePopupOpen] = useState(false);
 
   useEffect(() => {
-    Promise.all([configApi.getUserData(), configApi.getInitialCards()])
-      .then(([userData, cardsData]) => {
-        setCurrentUser(userData);
-        setCards(cardsData);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+    if (isLoggedIn) {
+      Promise.all([configApi.getUserData(), configApi.getInitialCards()])
+        .then(([userData, cardsData]) => {
+          setCurrentUser(userData);
+          setCards(cardsData);
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     function handleClosePopup(e) {
@@ -58,8 +63,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem("jwt")) {
-      const jwt = localStorage.getItem("jwt");
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
       checkToken(jwt)
         .then((res) => {
           setUserEmail(res.data.email);
@@ -172,15 +177,22 @@ function App() {
     register(password, email)
       .then(() => {
         setIsAuthStatus(true);
-        setIsInfoTooltipOpen(true);
+        setPopupMessageStatus({
+          text: "Вы успешно зарегистрировались!",
+        });
         navigate("/sign-in");
       })
       .catch((err) => {
         console.log(err);
+        setPopupMessageStatus({
+          text: "Что-то пошло не так! Попробуйте ещё раз.",
+        });
         setIsAuthStatus(false);
-        setIsInfoTooltipOpen(true);
       })
-      .finally(() => setIsProcessStatus(false));
+      .finally(() => {
+        setIsInfoTooltipOpen(true);
+        setIsProcessStatus(false);
+      });
   }
 
   function handleLogin(password, email) {
@@ -195,6 +207,9 @@ function App() {
       .catch((err) => {
         console.log(err);
         setIsAuthStatus(false);
+        setPopupMessageStatus({
+          text: "Что-то пошло не так! Попробуйте ещё раз.",
+        });
         setIsInfoTooltipOpen(true);
       })
       .finally(() => setIsProcessStatus(false));
@@ -278,6 +293,7 @@ function App() {
             onClose={closeAllPopups}
             isOpen={isInfoTooltipOpen}
             isAuthStatus={isAuthStatus}
+            message={popupMessageStatus}
           />
         </div>
       </div>
