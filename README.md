@@ -30,6 +30,9 @@
 * Webpack
 * API (GET, POST, PATCH, PUT, DELETE)
 
+## Ссылки
+* [Проект](https://sdlmdev.github.io/react-mesto-auth)
+
 ## Установка и запуск проекта:
 * `git clone https://github.com/sdlmdev/react-mesto-auth` - клонирует репозиторий
 * `npm install` - устанавливает зависимости
