@@ -37,3 +37,5 @@
 * `git clone https://github.com/sdlmdev/react-mesto-auth` - клонирует репозиторий
 * `npm install` - устанавливает зависимости
 * `npm run start` — запускает проект   
+
+### Статус проекта: завершен
