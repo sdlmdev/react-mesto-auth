@@ -1,4 +1,4 @@
-const BASE_URL = "https://auth.nomoreparties.co";
+const BASE_URL = "https://mesto.api.sdlmdev.site";
 
 function getResponse(response) {
   if (response.ok) {
@@ -15,6 +15,7 @@ export const register = (password, email) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ password, email }),
+    credentials: "include",
   }).then((res) => {
     return getResponse(res);
   });
@@ -27,6 +28,7 @@ export const login = (password, email) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ password, email }),
+    credentials: "include",
   }).then((res) => {
     return getResponse(res);
   });

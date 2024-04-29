@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { configApi } from "../utils/Api";
 import CurrentUserContext from "../contexts/CurrentUserContext";
 import Header from "./Header";
@@ -14,7 +14,11 @@ import Login from "./Login";
 import Register from "./Register";
 import ProtectedRoute from "./ProtectedRoute";
 import InfoTooltip from "./InfoTooltip";
-import { register, login, checkToken } from "../utils/Auth";
+import {
+  register,
+  login,
+  checkToken,
+} from "../utils/Auth";
 
 function App() {
   const navigate = useNavigate();
@@ -35,16 +39,7 @@ function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isConfirmPlacePopupOpen, setIsConfirmPlacePopupOpen] = useState(false);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      Promise.all([configApi.getUserData(), configApi.getInitialCards()])
-        .then(([userData, cardsData]) => {
-          setCurrentUser(userData);
-          setCards(cardsData);
-        })
-        .catch((err) => console.log(err));
-    }
-  }, [isLoggedIn]);
+  const jwt = localStorage.getItem("jwt");
 
   useEffect(() => {
     function handleClosePopup(e) {
@@ -61,24 +56,31 @@ function App() {
       document.removeEventListener("mousedown", handleClosePopup);
     };
   }, []);
-
+  
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
     if (jwt) {
       checkToken(jwt)
         .then((res) => {
-          setUserEmail(res.data.email);
+          configApi.getToken(jwt);
+          setUserEmail(res.email);
           setIsLoggedIn(true);
+          setCurrentUser(res);
           navigate("/");
         })
         .catch((err) => console.log(err));
+
+      configApi.getInitialCards({authorization: `Bearer ${jwt}`})
+      .then((res) => {
+        setCards(res.reverse());
+      })
+      .catch((err) => console.log(err));
     }
-  }, [navigate]);
+  }, [jwt]);
 
   function handleSignOut() {
     localStorage.removeItem("jwt");
-    setUserEmail("");
     setIsLoggedIn(false);
+    setUserEmail("");
   }
 
   function handleEditAvatarClick() {
@@ -113,7 +115,7 @@ function App() {
   }
 
   function handleCardLike(card) {
-    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+    const isLiked = card.likes.some((i) => i === currentUser._id);
 
     configApi
       .changeLikeCardStatus(card._id, !isLiked)
@@ -199,10 +201,9 @@ function App() {
     setIsProcessStatus(true);
     login(password, email)
       .then((res) => {
-        setIsLoggedIn(true);
-        setUserEmail(email);
-        navigate("/");
         localStorage.setItem("jwt", res.token);
+        setIsLoggedIn(true);
+        navigate("/");
       })
       .catch((err) => {
         console.log(err);
@@ -254,6 +255,14 @@ function App() {
                   login={handleLogin}
                   isLoggedIn={isLoggedIn}
                   isLoading={isProcessStatus}
+                />
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  to="/"
                 />
               }
             />

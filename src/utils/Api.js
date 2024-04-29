@@ -4,6 +4,10 @@ class Api {
     this._headers = headers;
   }
 
+  getToken(jwt) {
+    this._headers.authorization = `Bearer ${jwt}`;
+  }
+
   _getResponse(response) {
     if (response.ok) {
       return response.json();
@@ -12,9 +16,9 @@ class Api {
     return Promise.reject(`Ошибка: ${response.status}`);
   }
 
-  getInitialCards() {
+  getInitialCards(headers = this._headers) {
     return fetch(`${this._url}/cards`, {
-      headers: this._headers,
+      headers: headers,
     }).then(this._getResponse);
   }
 
@@ -78,9 +82,8 @@ class Api {
 }
 
 export const configApi = new Api({
-  url: "https://mesto.nomoreparties.co/v1/cohort-58",
+  url: "https://mesto.api.sdlmdev.site",
   headers: {
-    authorization: "75d25dc2-14a8-4b28-b9de-a2d789ee3e64",
     "Content-Type": "application/json",
   },
 });
